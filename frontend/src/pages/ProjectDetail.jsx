@@ -16,7 +16,7 @@ function ProjectDetail() {
   const [newTaskPriority, setNewTaskPriority] = useState('medium');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
   const [selectedMemberId, setSelectedMemberId] = useState('');
-  const [addMemberUserId, setAddMemberUserId] = useState('');
+  const [addMemberIdentifier, setAddMemberIdentifier] = useState('');
   const [addMemberRole, setAddMemberRole] = useState('member');
 
   useEffect(() => {
@@ -90,14 +90,14 @@ function ProjectDetail() {
 
   const handleAddMember = async (e) => {
     e.preventDefault();
-    if (!addMemberUserId) {
-      setError('User ID is required');
+    if (!addMemberIdentifier) {
+      setError('Name or email is required');
       return;
     }
 
     try {
-      await addProjectMember(projectId, parseInt(addMemberUserId), addMemberRole);
-      setAddMemberUserId('');
+      await addProjectMember(projectId, addMemberIdentifier, addMemberRole);
+      setAddMemberIdentifier('');
       setAddMemberRole('member');
       loadData();
     } catch (err) {
@@ -189,10 +189,10 @@ function ProjectDetail() {
             </div>
             <form onSubmit={handleAddMember} className="add-member-form">
               <input
-                type="number"
-                placeholder="User ID"
-                value={addMemberUserId}
-                onChange={(e) => setAddMemberUserId(e.target.value)}
+                type="text"
+                placeholder="Name or Email"
+                value={addMemberIdentifier}
+                onChange={(e) => setAddMemberIdentifier(e.target.value)}
               />
               <select
                 value={addMemberRole}

@@ -141,11 +141,11 @@ export async function deleteProject(req, res) {
 
 export async function addProjectMember(req, res) {
   const { projectId } = req.params;
-  const { userId, role } = req.body;
+  const { userId, email, name, identifier, role } = req.body;
   const currentUserId = req.user.id;
 
-  if (!userId || !role) {
-    return res.status(400).json({ error: 'User ID and role are required' });
+  if (!role) {
+    return res.status(400).json({ error: 'Role is required' });
   }
 
   try {
@@ -159,16 +159,46 @@ export async function addProjectMember(req, res) {
       return res.status(403).json({ error: 'Only project admin can add members' });
     }
 
-    // Check if user exists
-    const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [userId]);
+    // Resolve identifier to user id
+    let resolvedUserId = userId;
+    if (!resolvedUserId) {
+      const ident = identifier || email || name;
+      if (!ident) {
+        return res.status(400).json({ error: 'User identifier (userId, email, or name) is required' });
+      }
+
+      if (ident.includes('@')) {
+        // treat as email (case-insensitive)
+        const u = await pool.query('SELECT id FROM users WHERE LOWER(email) = LOWER($1)', [ident]);
+        if (u.rows.length === 0) return res.status(404).json({ error: 'User not found by email' });
+        resolvedUserId = u.rows[0].id;
+      } else {
+        // treat as name (case-insensitive, partial match)
+        const u = await pool.query(
+          'SELECT id, name, email FROM users WHERE LOWER(name) LIKE LOWER($1) ORDER BY name ASC',
+          [`%${ident}%`]
+        );
+        if (u.rows.length === 0) return res.status(404).json({ error: `User not found with name "${ident}"` });
+        if (u.rows.length > 1) {
+          return res.status(400).json({ 
+            error: `Multiple users found with name "${ident}"; use email or full name`, 
+            users: u.rows.map(row => ({ id: row.id, name: row.name, email: row.email }))
+          });
+        }
+        resolvedUserId = u.rows[0].id;
+      }
+    }
+
+    // Check if user exists (final check)
+    const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [resolvedUserId]);
     if (userCheck.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Add member
+    // Add or update member
     await pool.query(
       'INSERT INTO project_members (project_id, user_id, role) VALUES ($1, $2, $3) ON CONFLICT (project_id, user_id) DO UPDATE SET role = $3',
-      [projectId, userId, role]
+      [projectId, resolvedUserId, role]
     );
 
     res.json({ message: 'Member added successfully' });

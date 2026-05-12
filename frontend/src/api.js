@@ -40,8 +40,8 @@ export const updateProject = (projectId, name, description) =>
 export const deleteProject = (projectId) =>
   api.delete(`/projects/${projectId}`);
 
-export const addProjectMember = (projectId, userId, role) =>
-  api.post(`/projects/${projectId}/members`, { userId, role });
+export const addProjectMember = (projectId, identifier, role) =>
+  api.post(`/projects/${projectId}/members`, { identifier, role });
 
 export const getProjectMembers = (projectId) =>
   api.get(`/projects/${projectId}/members`);
