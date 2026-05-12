@@ -1,0 +1,112 @@
+# Team Task Manager - Quick Start Guide
+
+## 🚀 Quick Setup (5 minutes)
+
+### 1. Prerequisites
+- Node.js (v16+)
+- PostgreSQL running locally
+- npm/yarn
+
+### 2. Setup Database
+
+```bash
+# Create PostgreSQL database
+psql -U postgres
+CREATE DATABASE team_task_manager;
+\q
+```
+
+### 3. Configure Backend
+
+```bash
+cd backend
+cp .env.example .env
+# Edit .env and update DATABASE_URL:
+# DATABASE_URL=postgresql://postgres:password@localhost:5432/team_task_manager
+# JWT_SECRET=your-super-secret-key
+```
+
+### 4. Configure Frontend
+
+```bash
+cd frontend
+cp .env.example .env
+# .env already has correct default for local development
+```
+
+### 5. Install & Run
+
+**Backend:**
+```bash
+cd backend
+npm install
+npm run dev
+# Backend runs on http://localhost:5000
+```
+
+**Frontend (new terminal):**
+```bash
+cd frontend
+npm install
+npm run dev
+# Frontend runs on http://localhost:3000
+```
+
+### 6. Access the App
+- Open http://localhost:3000 in your browser
+- Create account or login
+- Start using Team Task Manager!
+
+## 📋 Default Test Credentials
+No default credentials - create your own account!
+
+## 🌐 Live URLs (After Deployment)
+- Backend: `https://team-task-manager-backend.railway.app`
+- Frontend: `https://team-task-manager-frontend.railway.app`
+
+## 🐛 Troubleshooting
+
+### Backend won't connect to database
+- Ensure PostgreSQL is running
+- Check DATABASE_URL in backend/.env
+- Run `npm run dev` from backend directory
+
+### Frontend can't connect to backend
+- Ensure backend is running on port 5000
+- Check .env VITE_API_URL setting
+- Clear browser cache and reload
+
+### Port 5000 already in use
+- Kill process: `lsof -ti:5000 | xargs kill -9` (macOS/Linux)
+- Or change PORT in backend/.env
+
+## 📁 Project Structure
+```
+├── backend/        # Node.js + Express API
+│   ├── src/       # Source code
+│   └── server.js  # Entry point
+├── frontend/       # React + Vite app
+│   ├── src/       # React components
+│   └── index.html # HTML entry
+└── README.txt     # Full documentation
+```
+
+## 🚢 Deploying to Railway
+
+See `RAILWAY_DEPLOYMENT.txt` for detailed instructions.
+
+## ✨ Features Included
+✅ User authentication with JWT
+✅ Project management
+✅ Task tracking (To Do, In Progress, Done)
+✅ Team member management
+✅ Role-based access (Admin, Member)
+✅ Dashboard with statistics
+✅ Kanban board view
+✅ Responsive design
+
+## 📞 Need Help?
+Check README.txt for comprehensive documentation!
+
+---
+Happy task managing! 🎯

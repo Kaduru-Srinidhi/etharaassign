@@ -1,0 +1,158 @@
+# Deployment Guide - Team Task Manager on Railway
+
+## Prerequisites
+- GitHub account with this repository
+- Railway account (https://railway.app)
+- PostgreSQL database (can use Railway's PostgreSQL service)
+
+## Step 1: Deploy PostgreSQL Database on Railway
+
+1. Go to [Railway.app](https://railway.app)
+2. Click "New Project"
+3. Click "Provision PostgreSQL"
+4. Railway will create a PostgreSQL instance and provide connection details
+5. Note the `DATABASE_URL` connection string (you'll need this)
+
+## Step 2: Deploy Backend on Railway
+
+1. In Railway, click "New Service"
+2. Select "GitHub Repo"
+3. Select your fork/copy of this repository
+4. Railway will detect it's a Node.js project
+5. In the Variables tab, add:
+   - `DATABASE_URL`: Your PostgreSQL connection string
+   - `JWT_SECRET`: Generate a strong secret key (e.g., `your-long-random-secret-key-here`)
+   - `NODE_ENV`: `production`
+6. Set root directory to `backend` if Railway asks
+7. Railway auto-deploys on push to main branch
+8. Once deployed, note the backend URL (e.g., `https://your-app-backend.railway.app`)
+
+## Step 3: Deploy Frontend on Railway
+
+### Option A: Using Vite Static Build (Recommended)
+1. Update frontend `vite.config.js` to set the API URL:
+```javascript
+export default {
+  // ... other config
+  define: {
+    __API_URL__: JSON.stringify(process.env.VITE_API_URL || 'http://localhost:5000')
+  }
+}
+```
+
+2. Update `src/api.js` to use:
+```javascript
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+```
+
+3. In Railway:
+   - New Service → GitHub Repo
+   - Select repository
+   - Set build command: `cd frontend && npm install && npm run build`
+   - Set start command: `npx serve -s dist`
+   - Add variable: `VITE_API_URL`: Your backend URL
+
+### Option B: Using Railway's Build and Deploy
+1. New Service → GitHub Repo
+2. Set root directory to `frontend`
+3. Railway detects Vite and auto-configures
+4. Add environment variable with your backend URL
+
+## Step 4: Environment Variables Setup
+
+### Backend Variables
+```
+PORT=5000  (Railway auto-assigns, but explicit is good)
+DATABASE_URL=postgresql://username:password@host:port/database
+JWT_SECRET=your-super-secret-key-make-it-long-and-random
+NODE_ENV=production
+```
+
+### Frontend Variables
+```
+VITE_API_URL=https://your-backend.railway.app
+```
+
+## Step 5: Verify Deployment
+
+1. Visit your frontend URL
+2. Create a new account
+3. Create a project
+4. Create tasks
+5. Test all features
+
+## Troubleshooting Railway Deployment
+
+### Backend Won't Connect to Database
+- Verify DATABASE_URL format
+- Check PostgreSQL service is running in Railway
+- Ensure JWT_SECRET is set
+
+### Frontend Can't Connect to Backend
+- Verify VITE_API_URL is set correctly
+- Check backend is accessible from frontend URL
+- Verify CORS is enabled in backend
+
+### Build Fails
+- Check buildpacks are correct
+- Verify Node version compatibility
+- Check for missing dependencies
+
+## Monitoring on Railway
+
+1. Go to your project in Railway
+2. Click on service to see logs
+3. Check Variables tab for environment settings
+4. Use Railway CLI: `railway logs`
+
+## Scaling & Performance
+
+- Railway auto-scales based on demand
+- Monitor resource usage in Railway dashboard
+- Consider upgrading plan for production use
+
+## Troubleshooting
+
+### Cold Start Issues
+- Railway may have slight delay on first request
+- This is normal for free tier
+
+### Database Connection Pool
+- Adjust connection pool in `backend/src/db/pool.js` if needed
+- Railway PostgreSQL has connection limits
+
+### Static Files Not Loading
+- Ensure frontend is properly built
+- Check if `dist` folder is created
+- Verify build command in Railway
+
+## Security Best Practices
+
+1. **JWT_SECRET**: Use a strong, random key (32+ characters)
+2. **CORS**: Already configured for development, adjust for production
+3. **Database**: Use strong passwords for PostgreSQL
+4. **HTTPS**: Railway provides HTTPS by default
+5. **Rate Limiting**: Consider adding rate limiting middleware
+
+## Continuous Deployment
+
+- Every push to `main` branch auto-deploys
+- Create feature branches to test before merge
+- Use pull requests for code review
+
+## Rollback
+
+- Railway keeps deployment history
+- Click "Revert" on previous deployment if needed
+- Database changes may need manual rollback
+
+## Custom Domain (Optional)
+
+1. In Railway project settings
+2. Add custom domain
+3. Update DNS records as instructed
+4. Update frontend API URL if needed
+
+---
+
+For more Railway documentation: https://docs.railway.app/
