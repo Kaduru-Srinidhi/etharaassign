@@ -97,6 +97,12 @@ VITE_API_URL=https://your-backend.railway.app
 - Check buildpacks are correct
 - Verify Node version compatibility
 - Check for missing dependencies
+- This repository is a monorepo, so do not deploy from the root directory.
+- Create two Railway services from the same repo:
+  - Backend service root directory: `backend`
+  - Frontend service root directory: `frontend`
+- If Railway is building from repo root, image build can fail because root has no `package.json`.
+- Frontend service should run a web process (`npm run start`), not only `npm run build`.
 
 ## Monitoring on Railway
 
