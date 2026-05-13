@@ -1,9 +1,26 @@
 # Deployment Guide - Team Task Manager on Railway
 
+## ⚠️ IMPORTANT: This is a Monorepo - Root Directory MUST be Set
+
+**This repository contains TWO separate services in subdirectories:**
+- `backend/` → Deploy as Backend Service
+- `frontend/` → Deploy as Frontend Service
+
+**YOU MUST CREATE TWO RAILWAY SERVICES**, each with its own root directory:
+1. Backend service with root directory = `backend`
+2. Frontend service with root directory = `frontend`
+
+**If you don't set the root directory, the build will fail with "No package.json found".**
+
+See [QUICK_RAILWAY_FIX.md](QUICK_RAILWAY_FIX.md) for the 2-minute fix if this happens.
+
+---
+
 ## Prerequisites
 - GitHub account with this repository
 - Railway account (https://railway.app)
 - PostgreSQL database (can use Railway's PostgreSQL service)
+- **Two Railway services** (backend + frontend)
 
 ## Step 1: Deploy PostgreSQL Database on Railway
 
@@ -15,34 +32,39 @@
 
 ## Step 2: Deploy Backend on Railway
 
+### ⚠️ CRITICAL: Set Root Directory to `backend`
+
 1. In Railway, click "New Service"
 2. Select "GitHub Repo"
 3. Select your fork/copy of this repository
-4. Railway will detect it's a Node.js project
-5. In the Variables tab, add:
+4. **BEFORE proceeding:** Click "Settings" → Find "Root Directory" field
+5. **Enter:** `backend` (exactly this, no slashes, no dots)
+6. Click Save
+7. Railway will detect it's a Node.js project
+8. In the Variables tab, add:
    - `DATABASE_URL`: Your PostgreSQL connection string
-   - `JWT_SECRET`: Generate a strong secret key (e.g., `your-long-random-secret-key-here`)
+   - `JWT_SECRET`: Generate a strong secret key (e.g., use `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
    - `NODE_ENV`: `production`
-6. Set root directory to `backend` if Railway asks
-7. Railway auto-deploys on push to main branch
-8. Once deployed, note the backend URL (e.g., `https://your-app-backend.railway.app`)
+   - `PORT`: `5000`
+9. Railway auto-deploys on push to main branch
+10. Once deployed, note the backend URL (e.g., `https://your-app-backend.railway.app`)
+11. **Verify in logs:** Should show "Server running on port 5000"
 
 ## Step 3: Deploy Frontend on Railway
 
-### Option A: Using Vite Static Build (Recommended)
-1. The frontend already reads `VITE_API_URL` in `frontend/src/api.js`, so you only need to set the environment variable in Railway.
-2. In Railway:
-   - New Service → GitHub Repo
-   - Select repository
-   - Set root directory to `frontend`
-   - Add variable: `VITE_API_URL`: Your backend URL
-   - Use the existing start command from `frontend/package.json`: `npm run start`
+### ⚠️ CRITICAL: Set Root Directory to `frontend`
 
-### Option B: Using Railway's Build and Deploy
-1. New Service → GitHub Repo
-2. Set root directory to `frontend`
-3. Railway detects Vite and auto-configures the build
-4. Add environment variable with your backend URL as `VITE_API_URL`
+1. In Railway, click "New Service"
+2. Select "GitHub Repo"
+3. Select repository
+4. **BEFORE proceeding:** Click "Settings" → Find "Root Directory" field
+5. **Enter:** `frontend` (exactly this, no slashes, no dots)
+6. Click Save
+7. Railway detects Vite and auto-configures the build
+8. In the Variables tab, add:
+   - `VITE_API_URL`: Your backend URL from Step 2 (e.g., `https://your-app-backend.railway.app`)
+9. Railway auto-deploys
+10. **Verify in logs:** Should show "✓ built in X.XXs"
 
 ## Step 4: Environment Variables Setup
 
@@ -106,6 +128,12 @@ VITE_API_URL=https://your-backend.railway.app
 ## Troubleshooting
 
 ### Cold Start Issues
+- Ra❌ Build Failed: "No package.json found"
+**This means root directory is not set.**
+- Solution: See [QUICK_RAILWAY_FIX.md](QUICK_RAILWAY_FIX.md)
+- Go to service Settings, set Root Directory to `backend` or `frontend`
+
+### Cold Start Issues
 - Railway may have slight delay on first request
 - This is normal for free tier
 
@@ -117,7 +145,7 @@ VITE_API_URL=https://your-backend.railway.app
 - Ensure frontend is properly built
 - Check if `dist` folder is created
 - Verify build command in Railway
-
+- Verify Root Directory is set to `frontend`
 ## Security Best Practices
 
 1. **JWT_SECRET**: Use a strong, random key (32+ characters)
