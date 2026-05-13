@@ -30,33 +30,19 @@
 ## Step 3: Deploy Frontend on Railway
 
 ### Option A: Using Vite Static Build (Recommended)
-1. Update frontend `vite.config.js` to set the API URL:
-```javascript
-export default {
-  // ... other config
-  define: {
-    __API_URL__: JSON.stringify(process.env.VITE_API_URL || 'http://localhost:5000')
-  }
-}
-```
-
-2. Update `src/api.js` to use:
-```javascript
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-```
-
-3. In Railway:
+1. The frontend already reads `VITE_API_URL` in `frontend/src/api.js`, so you only need to set the environment variable in Railway.
+2. In Railway:
    - New Service → GitHub Repo
    - Select repository
-   - Set build command: `cd frontend && npm install && npm run build`
-   - Set start command: `npx serve -s dist`
+   - Set root directory to `frontend`
    - Add variable: `VITE_API_URL`: Your backend URL
+   - Use the existing start command from `frontend/package.json`: `npm run start`
 
 ### Option B: Using Railway's Build and Deploy
 1. New Service → GitHub Repo
 2. Set root directory to `frontend`
-3. Railway detects Vite and auto-configures
-4. Add environment variable with your backend URL
+3. Railway detects Vite and auto-configures the build
+4. Add environment variable with your backend URL as `VITE_API_URL`
 
 ## Step 4: Environment Variables Setup
 

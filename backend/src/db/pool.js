@@ -11,11 +11,15 @@ function buildPoolConfig() {
 
   if (databaseUrl) {
     try {
+      const parsedUrl = new URL(databaseUrl);
+      const useSsl = !['localhost', '127.0.0.1'].includes(parsedUrl.hostname);
+
       // When a full DATABASE_URL is provided, pass only the connection string
-      // to the pg Pool. Passing both connectionString and separate user/password
-      // can cause parsing/typing issues (e.g. non-string password) in some envs.
+      // to the pg Pool. Railway-hosted Postgres requires SSL, while local
+      // connections usually do not.
       return {
         connectionString: databaseUrl,
+        ssl: useSsl ? { rejectUnauthorized: false } : false,
       };
     } catch (error) {
       throw new Error('DATABASE_URL is not a valid PostgreSQL connection string');
